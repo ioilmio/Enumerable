@@ -66,7 +66,7 @@ module Enumerable
 
     result = true
     my_each do |item|
-      result = false unless yield item
+      result = false if yield item
     end
     result
   end
@@ -77,27 +77,34 @@ module Enumerable
     counter
   end
 
-  # module end
+  def my_map(*)
+    return to_enum(:my_map) unless block_given?
+
+    result = []
+    my_each { |element| result << yield(element) }
+    result
+  end
+
+  def my_map_proc(proc)
+    result = []
+    my_each { |item| result << proc.call(item) }
+    result
+  end
+
+  def my_inject(arg)
+    memo = arg || self[0] if is_a?(Array)
+    my_each { |value| memo = yield(memo, value) }
+    memo
+  end
 end
 
-# arr = ['hi', 'hello', 'ciao', 1, 2, 3]
-array = [12, 3, 4, 5, 6]
-# friends = %w[Patatina Anna Roby Mara Andrea Maria Mimmo Marco]
-# friends.my_all?(String) { |friend| friend.length >= 5 }
-puts(array.my_all? { |n| n > 5 })
-puts(array.my_any? { |n| n > 5 })
-puts(array.my_none? { |n| n < 40 })
-puts(array.my_count { |x| x < 2 })
+array = [2, 4, 5]
 
-# arr.my_each { |n| puts n.to_s }
+def multiply_els(array)
+  array.my_inject(1) { |product, num| product * num }
+end
 
-# obj = { first: 'uno', second: 42, third: [1, 2, 3, 4], fourth: { nested: 'inside hash' } }
-# obj.my_each { |key, value| puts "#{key} key value is: #{value}" }
+cube = proc { |n| n**3 }
+puts array.my_map_proc(cube)
 
-# (1..5).my_each { |n| puts n * 5 }
-
-# arr.my_each_with_index { |value, index| puts value if index.even? }
-# puts(array.my_select { |n| n < 5 })
-# puts(friends.my_select { |friend| friend[0] == "P" })
-
-# puts(obj.my_select { |_key, value| value == "uno" })
+puts multiply_els([2, 4, 5])
