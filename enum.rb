@@ -1,4 +1,4 @@
-module Enumerable
+module Enumerable # rubocop:disable Metrics/ModuleLength
   def my_each
     return to_enum(:my_each) unless block_given?
 
@@ -41,39 +41,61 @@ module Enumerable
     selected
   end
 
-  def my_all?(*)
-    return true unless block_given?
-
-    result = true
-    my_each do |item|
-      result = false unless yield item
+  def my_all?(arg = nil) # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
+    if !block_given? && arg.nil?
+      my_each do |item|
+        return false unless item
+      end
+    elsif arg.is_a?(Class)
+      my_each do |item|
+        return false unless item.is_a?(arg)
+      end
+    elsif arg.is_a?(Regexp)
+      my_each do |item|
+        return false unless item.match(arg)
+      end
+    elsif arg
+      my_each do |item|
+        return false unless item == arg
+      end
     end
-    result
+    true
   end
 
-  def my_any?(*)
-    return true unless block_given?
-
-    result = false
-    my_each do |item|
-      result = true unless yield item
+  def my_any?(arg = nil) # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
+    if !block_given? && arg.nil?
+      my_each do |item|
+        return true if item
+      end
+    elsif arg.is_a?(Class)
+      my_each do |item|
+        return true if item.is_a? arg
+      end
+    elsif arg.is_a?(Regexp)
+      my_each do |item|
+        return true if item.match(arg)
+      end
+    elsif arg
+      my_each do |item|
+        return true if item == arg
+      end
     end
-    result
+    false
   end
 
-  def my_none?(*)
-    return true unless block_given?
-
-    result = true
-    my_each do |item|
-      result = false if yield item
-    end
-    result
+  def my_none?(arg = nil, &block)
+    !my_any?(arg, &block)
   end
 
-  def my_count
+  def my_count(arg = nil)
+    return length unless block_given? || !arg.nil?
+
     counter = 0
-    my_each { |value| counter += 1 if yield value }
+    unless arg.nil?
+      my_each do |item|
+        counter += 1 if item == arg
+      end
+    end
     counter
   end
 
@@ -98,13 +120,14 @@ module Enumerable
   end
 end
 
-array = [2, 4, 5]
+# array = [2, 4, 5]
 
-def multiply_els(array)
-  array.my_inject(1) { |product, num| product * num }
-end
+# def multiply_els(array)
+#   array.my_inject(1) { |product, num| product * num }
+# end
 
-cube = proc { |n| n**3 }
-puts array.my_map_proc(cube)
+# cube = proc { |n| n**3 }
+# puts array.my_map_proc(cube)
 
-puts multiply_els([2, 4, 5])
+# puts multiply_els([2, 4, 5])
+print [5, 4, 1, 2, 4, 4].my_count
