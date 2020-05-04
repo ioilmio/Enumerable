@@ -87,13 +87,19 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
     !my_any?(arg, &block)
   end
 
-  def my_count(arg = nil)
-    return length unless block_given? || !arg.nil?
-
+  def my_count(arg = nil) # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
     counter = 0
-    unless arg.nil?
+    if block_given? && arg.nil?
       my_each do |item|
-        counter += 1 if item == arg
+        counter += 1 if yield(item)
+      end
+    elsif !block_given? && !arg.nil?
+      my_each do |item|
+        counter += 1 if arg == item
+      end
+    else
+      my_each do
+        counter += 1
       end
     end
     counter
