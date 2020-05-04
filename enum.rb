@@ -87,33 +87,27 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
     !my_any?(arg, &block)
   end
 
-  def my_count(arg = nil) # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
+  def my_count(arg = nil)
+    return length unless block_given? || !arg.nil?
+
     counter = 0
-    if block_given? && arg.nil?
+    unless arg.nil?
       my_each do |item|
-        counter += 1 if yield(item)
-      end
-    elsif !block_given? && !arg.nil?
-      my_each do |item|
-        counter += 1 if arg == item
-      end
-    else
-      my_each do |_item|
-        counter += 1
+        counter += 1 if item == arg
       end
     end
     counter
   end
 
-  # def my_map(*)
-  #   return to_enum(:my_map) unless block_given?
+  def my_map(*)
+    return to_enum(:my_map) unless block_given?
 
-  #   result = []
-  #   my_each { |element| result << yield(element) }
-  #   result
-  # end
+    result = []
+    my_each { |element| result << yield(element) }
+    result
+  end
 
-  def my_map(proc)
+  def my_map_proc(proc)
     result = []
     my_each { |item| result << proc.call(item) }
     result
@@ -126,7 +120,6 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
   end
 end
 
-# (1..5).my_inject(4) { |product, num| product * num }
 # array = [2, 4, 5]
 
 # def multiply_els(array)
@@ -134,7 +127,7 @@ end
 # end
 
 # cube = proc { |n| n**3 }
-# puts array.my_map(cube)
+# puts array.my_map_proc(cube)
 
 # puts multiply_els([2, 4, 5])
-print [5, 4, 1, 2, 4, 4, 6].my_count
+print [5, 4, 1, 2, 4, 4].my_count
