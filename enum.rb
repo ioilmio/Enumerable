@@ -105,18 +105,17 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
     counter
   end
 
-  def my_map(*)
-    return to_enum(:my_map) unless block_given?
-
-    result = []
-    my_each { |element| result << yield(element) }
-    result
-  end
-
-  def my_map_proc(proc)
-    result = []
-    my_each { |item| result << proc.call(item) }
-    result
+  def my_map(proc = nil)
+    array = []
+    if block_given?
+      my_each { |i| array.push(yield(i)) } unless proc
+      my_each { |i| array << proc.call(i) } if proc
+    elsif proc
+      my_each { |i| array << proc.call(i) }
+    else
+      return to_enum
+    end
+    array
   end
 
   def my_inject(arg)
@@ -125,15 +124,3 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
     memo
   end
 end
-
-# array = [2, 4, 5]
-
-# def multiply_els(array)
-#   array.my_inject(1) { |product, num| product * num }
-# end
-
-# cube = proc { |n| n**3 }
-# puts array.my_map_proc(cube)
-
-# puts multiply_els([2, 4, 5])
-print [5, 4, 1, 2, 4, 4].my_count
