@@ -136,6 +136,5 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
 end
 
 def multiply_els(array)
-  p(array.my_inject(:*) { |product, i| })
+  p(array.my_inject { |product, i| })
 end
-multiply_els([2, 4, 5])
