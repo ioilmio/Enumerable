@@ -106,21 +106,36 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
   end
 
   def my_map(proc = nil)
-    array = []
+    result = []
     if block_given?
-      my_each { |i| array.push(yield(i)) } unless proc
-      my_each { |i| array << proc.call(i) } if proc
+      my_each { |item| result.push(yield(item)) } unless proc
+      my_each { |item| result << proc.call(item) } if proc
     elsif proc
-      my_each { |i| array << proc.call(i) }
+      my_each { |item| result << proc.call(item) }
     else
       return to_enum
     end
-    array
+    result
   end
 
-  def my_inject(arg)
-    memo = arg || self[0] if is_a?(Array)
-    my_each { |value| memo = yield(memo, value) }
+  def my_inject(memo = nil, symbol = nil, &proc)
+    proc = symbol.to_proc if symbol.is_a?(Symbol)
+    if memo.is_a?(Symbol)
+      proc = memo.to_proc
+      memo = nil
+    end
+    my_each do |item|
+      memo = if memo.nil?
+               item
+             else
+               proc.call(memo, item)
+             end
+    end
     memo
   end
 end
+
+def multiply_els(array)
+  p(array.my_inject(:*) { |product, i| })
+end
+multiply_els([2, 4, 5])
