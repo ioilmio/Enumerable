@@ -41,7 +41,7 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
     selected
   end
 
-  def my_all?(arg = nil) # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
+  def my_all?(arg = nil) # rubocop:disable Metrics/MethodLength, Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
     if !block_given? && arg.nil?
       my_each do |item|
         return false unless item
@@ -58,11 +58,15 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
       my_each do |item|
         return false unless item == arg
       end
+    elsif block_given?
+      my_each do |item|
+        return false unless yield item
+      end
     end
     true
   end
 
-  def my_any?(arg = nil) # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
+  def my_any?(arg = nil) # rubocop:disable Metrics/MethodLength, Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
     if !block_given? && arg.nil?
       my_each do |item|
         return true if item
@@ -78,6 +82,10 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
     elsif arg
       my_each do |item|
         return true if item == arg
+      end
+    elsif block_given?
+      my_each do |item|
+        return true if yield item
       end
     end
     false
@@ -125,16 +133,14 @@ module Enumerable # rubocop:disable Metrics/ModuleLength
       memo = nil
     end
     my_each do |item|
-      memo = if memo.nil?
-               item
-             else
-               proc.call(memo, item)
-             end
+      memo = memo.nil? ? item : proc.call(memo, item)
     end
     memo
   end
 end
 
 def multiply_els(array)
-  p(array.my_inject { |product, i| })
+  p(array.my_inject { |product, i| product * i })
 end
+
+multiply_els([2, 4, 5])
