@@ -42,7 +42,9 @@ You can play with it on irb, and compare my methods with the actual Ruby ones li
 ``my_map == map``
 ``and so on...``
 
+## Automated test ##
 
+To run automated test type rspec in the console whne you are inside the Enumerable folder
 
 
 ## Brought to you by
